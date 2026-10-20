@@ -20,6 +20,7 @@
         <div>
           <h1>Observatorio de Datos</h1>
           <p>Gobernanza Geoespacial · Estado de Arkansas</p>
+          <p class="byline">Santiago Sanchez Lara</p>
         </div>
       </header>
 
@@ -30,6 +31,7 @@
       <!-- Tabs -->
       <nav class="tabs" id="tabs">
         <button class="tab active" data-tab="explore">Explorar</button>
+        <button class="tab" data-tab="questions">Preguntas</button>
         <button class="tab" data-tab="dictionary">Diccionario</button>
         <button class="tab" data-tab="quality">Calidad</button>
       </nav>
@@ -41,17 +43,22 @@
           <div class="layer-switch" id="layerSwitch">
             <button class="layer-btn active" data-layer="counties">
               <span class="dot c-county"></span> Condados
-              <small>75 unidades · censo 1900–2020</small>
+              <small>75 unidades · censo 1900–2020 · F01</small>
             </button>
             <button class="layer-btn" data-layer="municipalities">
               <span class="dot c-muni"></span> Municipios
-              <small>200 ciudades · clase legal</small>
+              <small>200 ciudades · clase legal · F01</small>
             </button>
             <button class="layer-btn" data-layer="congress">
               <span class="dot c-cong"></span> Distritos Congresionales
-              <small>4 distritos federales</small>
+              <small>4 distritos federales · F01</small>
+            </button>
+            <button class="layer-btn" data-layer="climate">
+              <span class="dot c-clim"></span> Clima (estaciones)
+              <small>90 estaciones NOAA · F03</small>
             </button>
           </div>
+          <small class="layer-src" id="layerSrc"></small>
         </section>
 
         <section class="panel">
@@ -96,11 +103,62 @@
         </section>
       </div>
 
+      <!-- ===== TAB: PREGUNTAS ===== -->
+      <div class="tab-body hidden" data-body="questions">
+        <section class="panel">
+          <h2>Preguntas de la primera entrega</h2>
+          <p class="muted-p">El sistema responde 2 de estas preguntas con datos; las demás quedan declaradas como pendientes.</p>
+
+          <div class="q-block answered">
+            <div class="q-tag">RESPONDE</div>
+            <h3>1 · ¿Para quién es y qué responde?</h3>
+            <p>Para ciudadanía, periodistas y planificadores de Arkansas. Responde: ¿dónde vive
+            y cómo cambió la gente (1900–2020)?, ¿cómo se compara con Texas?, y ¿cómo es el clima por zona?</p>
+          </div>
+
+          <div class="q-block answered">
+            <div class="q-tag">RESPONDE</div>
+            <h3>2 · Las fuentes que sostienen el lago</h3>
+            <p><b>F01</b> Arkansas GIS Office · <b>F02</b> U.S. Census Bureau · <b>F03</b> NOAA NCEI.
+            Cada cifra muestra su fuente a un clic (ID, vigencia y fecha de prueba). Ver pestaña Diccionario.</p>
+          </div>
+
+          <div class="q-block pending">
+            <div class="q-tag">PENDIENTE</div>
+            <h3>3 · Lo que dejaron por fuera</h3>
+            <p>Datos a nivel de persona, direcciones y parcelas. Se excluyen por privacidad;
+            solo se publican agregados por zona (condado/municipio/estación).</p>
+          </div>
+
+          <div class="q-block pending">
+            <div class="q-tag">PENDIENTE</div>
+            <h3>4 · La IA en la búsqueda</h3>
+            <p>Se usó IA para localizar endpoints keyless y depurar la ingesta. Bitácora completa
+            (aciertos y errores) en el README del repositorio.</p>
+          </div>
+
+          <div class="q-block pending">
+            <div class="q-tag">PENDIENTE</div>
+            <h3>5 · El dato que podría hacer daño</h3>
+            <p>Ubicación precisa de personas. Mitigación: nunca se publica dato individual;
+            todo se agrega por zona. Ningún dato sensible a la vista.</p>
+          </div>
+
+          <div class="q-block pending">
+            <div class="q-tag">PENDIENTE</div>
+            <h3>6 · Lo que no encontraron</h3>
+            <p>Series de clima anteriores a 1991 por zona pequeña sin API key, y algunos
+            municipios con <code>pop2000</code> nulo (ver pestaña Calidad).</p>
+          </div>
+        </section>
+      </div>
+
       <!-- ===== TAB: DICCIONARIO ===== -->
       <div class="tab-body hidden" data-body="dictionary">
         <section class="panel">
           <h2>Diccionario de datos</h2>
-          <p class="muted-p">Metadatos de cada campo del conjunto activo. Cambia de capa en la pestaña Explorar.</p>
+          <p class="muted-p">Metadatos de cada campo del conjunto activo. Cambia de capa en la pestaña Explorar.
+          Descarga el Excel completo del lago desde el repositorio (<code>docs/diccionario_lago.xlsx</code>).</p>
           <div id="dictContent"></div>
         </section>
       </div>

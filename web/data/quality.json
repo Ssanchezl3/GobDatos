@@ -180,5 +180,50 @@
     ],
     "key_field": "district",
     "unique_keys": 4
+  },
+  "climate": {
+    "records": 90,
+    "fields": {
+      "tavg_annual": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 55.2,
+        "max": 65.1,
+        "mean": 60.6
+      },
+      "tmax_annual": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 63.3,
+        "max": 77.4,
+        "mean": 71.4
+      },
+      "tmin_annual": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 44.8,
+        "max": 54.6,
+        "mean": 49.8
+      },
+      "prcp_annual": {
+        "completeness": 98.9,
+        "nulls": 1,
+        "min": 45.63,
+        "max": 66.57,
+        "mean": 53.0
+      },
+      "elev_ft": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 23.5,
+        "max": 723.9,
+        "mean": 152.6
+      }
+    },
+    "key_field": "station_id",
+    "unique_keys": 90,
+    "issues": [
+      "Sin anomalias detectadas"
+    ]
   }
 }

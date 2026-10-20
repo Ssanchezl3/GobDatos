@@ -141,4 +141,10 @@ body {
   #stage { flex-direction: column; }
   .divider { width: auto; height: 2px; }
   .divider span { top: 50%; transform: translate(-50%, -50%); }
+  #topbar { gap: 10px; }
+  .tb-controls { width: 100%; }
+  .map-head { min-width: 150px; padding: 8px 10px; }
+  .map-head .mh-big { font-size: 18px; }
+  #insights { padding: 8px 12px; }
+  .legend-card { bottom: 44px; padding: 8px 12px; gap: 8px; }
 }

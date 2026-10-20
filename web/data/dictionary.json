@@ -91,5 +91,52 @@
         "unit": "grados (EPSG:4326)"
       }
     ]
+  },
+  "climate": {
+    "label": "Clima — estaciones NOAA (F03)",
+    "fields": [
+      {
+        "field": "station_id",
+        "type": "codigo",
+        "desc": "Identificador de estación NOAA",
+        "unit": ""
+      },
+      {
+        "field": "name",
+        "type": "texto",
+        "desc": "Nombre de la estación",
+        "unit": ""
+      },
+      {
+        "field": "elev_ft",
+        "type": "numero",
+        "desc": "Elevación",
+        "unit": "pies"
+      },
+      {
+        "field": "tavg_annual",
+        "type": "numero",
+        "desc": "Temperatura media anual",
+        "unit": "°F"
+      },
+      {
+        "field": "tmax_annual",
+        "type": "numero",
+        "desc": "Temperatura máxima media anual",
+        "unit": "°F"
+      },
+      {
+        "field": "tmin_annual",
+        "type": "numero",
+        "desc": "Temperatura mínima media anual",
+        "unit": "°F"
+      },
+      {
+        "field": "prcp_annual",
+        "type": "numero",
+        "desc": "Precipitación anual",
+        "unit": "pulgadas"
+      }
+    ]
   }
 }

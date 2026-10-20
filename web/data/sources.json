@@ -1,0 +1,54 @@
+{
+  "test_date": "2026-10-20",
+  "note": "Cada cifra del sistema referencia uno de estos IDs. Ninguna fuente requiere llave paga ni tarjeta.",
+  "sources": {
+    "F01": {
+      "id": "F01",
+      "name": "Arkansas GIS Office — Límites administrativos",
+      "publisher": "Arkansas GIS Office (Department of Transformation and Shared Services)",
+      "portal": "https://geodata.gis.arkansas.gov/",
+      "endpoint": "https://gis.arkansas.gov/arcgis/rest/services/FEATURESERVICES/Boundaries/FeatureServer",
+      "service_type": "ArcGIS REST FeatureServer (keyless)",
+      "crs": "EPSG:4326 (WGS 84)",
+      "coverage": "Arkansas — 75 condados, 200 municipios, 4 distritos congresionales",
+      "validity": "Límites vigentes; población censal decadal 1900–2020",
+      "test_date": "2026-10-20",
+      "license": "Datos públicos del Estado de Arkansas; uso abierto. Ver política del portal.",
+      "license_url": "https://gis.arkansas.gov/",
+      "api_key_required": false,
+      "ingest_script": "scripts/process_data.py"
+    },
+    "F02": {
+      "id": "F02",
+      "name": "U.S. Census Bureau — Geografía y población de condados",
+      "publisher": "U.S. Census Bureau",
+      "portal": "https://www.census.gov/",
+      "endpoint": "TIGERweb Generalized_ACS2024/State_County + archivos Population Estimates (www2.census.gov)",
+      "service_type": "ArcGIS REST + CSV estático (keyless)",
+      "crs": "EPSG:4326 (WGS 84)",
+      "coverage": "Arkansas (05) y Texas (48) — 329 condados; población 2000/2010/2020",
+      "validity": "Censos decenales 2000, 2010 y base 2020",
+      "test_date": "2026-10-20",
+      "license": "Obra del gobierno de EE. UU.: dominio público (sin restricciones de uso).",
+      "license_url": "https://www.census.gov/data/developers/about/terms-of-service.html",
+      "api_key_required": false,
+      "ingest_script": "scripts/build_compare.py"
+    },
+    "F03": {
+      "id": "F03",
+      "name": "NOAA NCEI — Normales climáticas 1991–2020 (Arkansas)",
+      "publisher": "NOAA National Centers for Environmental Information (NCEI)",
+      "portal": "https://www.ncei.noaa.gov/products/land-based-station/us-climate-normals",
+      "endpoint": "https://www.ncei.noaa.gov/data/normals-monthly/1991-2020/",
+      "service_type": "CSV estático por estación (keyless)",
+      "crs": "EPSG:4326 (WGS 84)",
+      "coverage": "Arkansas — 90 estaciones meteorológicas",
+      "validity": "Normales de 30 años, periodo 1991–2020",
+      "test_date": "2026-10-20",
+      "license": "Obra del gobierno de EE. UU.: dominio público. Se solicita citar a NOAA/NCEI.",
+      "license_url": "https://www.ncei.noaa.gov/access/us-climate-normals/",
+      "api_key_required": false,
+      "ingest_script": "scripts/build_climate.py"
+    }
+  }
+}

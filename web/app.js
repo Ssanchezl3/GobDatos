@@ -8,7 +8,12 @@ const DECADES = [1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,202
 // Escala de color secuencial (oscuro -> claro-calido)
 const RAMP = ['#0d2b3e','#11465c','#1f7a7a','#36a89a','#5fd0a8','#9ee6a0','#f2e394','#f6a94a','#e8622a'];
 
-const LAYER_LABELS = { counties: 'Condados', municipalities: 'Municipios', congress: 'Distritos Congresionales' };
+const LAYER_LABELS = {
+  counties: 'Condados', municipalities: 'Municipios',
+  congress: 'Distritos Congresionales', climate: 'Clima (estaciones NOAA)',
+};
+// Cada capa referencia su fuente registrada (F01/F02/F03)
+const LAYER_SOURCE = { counties: 'F01', municipalities: 'F01', congress: 'F01', climate: 'F03' };
 
 const state = {
   layer: 'counties',
@@ -19,7 +24,7 @@ const state = {
   bubbles: false,
 };
 
-let map, geoLayer, bubbleLayer, data = {}, stats = {}, dictionary = {}, quality = {};
+let map, geoLayer, bubbleLayer, data = {}, stats = {}, dictionary = {}, quality = {}, sources = {};
 let currentScale = null;
 
 /* ---------------- utilidades ---------------- */
@@ -28,6 +33,7 @@ const fmtK = n => n == null ? '—' : n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1
 
 function metricValue(props) {
   if (state.layer === 'congress') return 1;
+  if (state.layer === 'climate') return props.tavg_annual;
   const pop = props['pop' + state.year];
   if (state.metric === 'pop') return pop;
   if (state.metric === 'density') {
@@ -105,9 +111,17 @@ function showInfo(p, ev) {
       <div class="ic-row">Pob. 2010 <b>${fmt(p.pop2010)}</b></div>
       <div class="ic-row">Superficie <b>${(p.sq_miles||0).toFixed(2)} mi²</b></div>
       <span class="tag">${p.classification || 'N/D'}</span>`;
+  } else if (state.layer === 'climate') {
+    html = `<h3>${p.name}</h3>
+      <div class="ic-row">Temp. media <b>${p.tavg_annual}°F</b></div>
+      <div class="ic-row">Máx / Mín <b>${p.tmax_annual ?? '—'} / ${p.tmin_annual ?? '—'}°F</b></div>
+      <div class="ic-row">Precipitación <b>${p.prcp_annual ?? '—'} in/año</b></div>
+      <div class="ic-row">Elevación <b>${fmt(p.elev_ft)} ft</b></div>
+      <span class="tag">NOAA · F03 · normales 1991–2020</span>`;
   } else {
     html = `<h3>Distrito Congresional ${p.district}</h3>
-      <div class="ic-row">Cámara de Representantes de EE. UU.</div>`;
+      <div class="ic-row">Cámara de Representantes de EE. UU.</div>
+      <span class="tag">Arkansas GIS · F01</span>`;
   }
   card.innerHTML = html;
   card.classList.remove('hidden');
@@ -152,39 +166,68 @@ function render() {
   const fc = data[state.layer];
   if (!fc) return;
   if (state.layer !== 'congress') currentScale = colorScale(fc.features);
-  geoLayer = L.geoJSON(fc, { style: styleFor, onEachFeature }).addTo(map);
+
+  if (state.layer === 'climate') {
+    // capa de puntos: estaciones coloreadas por temperatura media
+    geoLayer = L.geoJSON(fc, {
+      pointToLayer: (f, latlng) => L.circleMarker(latlng, {
+        radius: 6, weight: .8, color: '#000',
+        fillColor: currentScale.fn(metricValue(f.properties)), fillOpacity: .9,
+      }),
+      onEachFeature,
+    }).addTo(map);
+  } else {
+    geoLayer = L.geoJSON(fc, { style: styleFor, onEachFeature }).addTo(map);
+  }
+
   renderBubbles();
   buildLegend();
   updateKPIs();
   togglePanels();
   buildRanking();
   updateExportNote();
+  updateLayerSrc();
+}
+
+/* nota de fuente de la capa activa (F0X) */
+function updateLayerSrc() {
+  const el = document.getElementById('layerSrc');
+  if (!el) return;
+  const sid = LAYER_SOURCE[state.layer];
+  const s = sources[sid];
+  el.innerHTML = s
+    ? `Fuente <b>${sid}</b> · ${s.name.split('—')[0].trim()} · vigencia: ${s.validity} · probado ${s.test_date}`
+    : '';
 }
 
 function togglePanels() {
   const isCounty = state.layer === 'counties';
   const isCongress = state.layer === 'congress';
-  document.getElementById('choroplethPanel').style.display = isCongress ? 'none' : 'block';
+  const isClimate = state.layer === 'climate';
+  // El panel coroplético (métricas de población) no aplica a congress ni climate
+  document.getElementById('choroplethPanel').style.display = (isCongress || isClimate) ? 'none' : 'block';
   document.getElementById('timePanel').style.display = isCounty ? 'block' : 'none';
   document.getElementById('rankPanel').style.display = isCongress ? 'none' : 'block';
   document.querySelector('[data-metric="growth"]').style.display = isCounty ? 'block' : 'none';
   document.getElementById('metricHint').textContent =
     state.metric === 'pop' ? 'población' : state.metric === 'density' ? 'densidad' : 'crecimiento';
-  document.getElementById('rankMetricLabel').textContent = metricLabel();
+  document.getElementById('rankMetricLabel').textContent = isClimate ? 'Temp. media (°F)' : metricLabel();
 }
 
 function buildLegend() {
   const el = document.getElementById('legend');
   if (state.layer === 'congress') { el.innerHTML = '<div class="row">4 distritos federales de EE. UU.</div>'; return; }
   const b = currentScale.breaks;
-  const unit = state.metric === 'density' ? '/mi²' : state.metric === 'growth' ? '%' : '';
+  const isClimate = state.layer === 'climate';
+  const unit = isClimate ? '°F' : state.metric === 'density' ? '/mi²' : state.metric === 'growth' ? '%' : '';
   let rows = '';
   for (let i = 0; i < RAMP.length; i++) {
     const lo = i === 0 ? 0 : b[i-1];
     const hi = b[i] != null ? b[i] : '+';
+    const fnum = v => (isClimate ? v.toFixed(0)+unit : fmtK(v));
     const label = state.metric === 'growth'
       ? `${Math.round(lo)}${unit} – ${hi==='+'?'+':Math.round(hi)+unit}`
-      : `${fmtK(lo)} – ${hi==='+'?'+':fmtK(hi)}${unit}`;
+      : `${fnum(lo)} – ${hi==='+'?'+':fnum(hi)}`;
     rows += `<div class="row"><span class="sw" style="background:${RAMP[i]}"></span>${label}</div>`;
   }
   el.innerHTML = rows;
@@ -192,6 +235,7 @@ function buildLegend() {
 
 function updateKPIs() {
   const strip = document.getElementById('kpiStrip');
+  const src = LAYER_SOURCE[state.layer];
   let kpis = [];
   if (state.layer === 'counties') {
     const fc = data.counties.features;
@@ -210,15 +254,55 @@ function updateKPIs() {
       { v: (stats.municipalities.by_class['First Class']||0), l: 'Primera clase' },
       { v: (stats.municipalities.by_class['Second Class']||0), l: 'Segunda clase' },
     ];
+  } else if (state.layer === 'climate') {
+    const fc = data.climate.features.map(f => f.properties);
+    const n = fc.length || 1;
+    const avgT = fc.reduce((s,p)=> s + (p.tavg_annual||0), 0) / n;
+    const avgP = fc.reduce((s,p)=> s + (p.prcp_annual||0), 0) / n;
+    kpis = [
+      { v: avgT.toFixed(1)+'°F', l: 'Temp. media estatal', a: true },
+      { v: fc.length, l: 'Estaciones' },
+      { v: avgP.toFixed(1)+' in', l: 'Precip. media/año' },
+    ];
   } else {
     kpis = [
       { v: '4', l: 'Distritos fed.', a: true },
       { v: fmtK(stats.counties.total_pop2020), l: 'Pob. estatal 2020' },
     ];
   }
+  // cada KPI es clicable: muestra su procedencia (F0X + vigencia + fecha de prueba)
   strip.innerHTML = kpis.map(k =>
-    `<div class="kpi"><div class="k-val ${k.a?'accent':''}">${k.v}</div><div class="k-lab">${k.l}</div></div>`
+    `<button class="kpi" data-src="${src}" title="Ver fuente del dato">
+       <div class="k-val ${k.a?'accent':''}">${k.v}</div>
+       <div class="k-lab">${k.l}</div>
+       <div class="k-src">${src}</div>
+     </button>`
   ).join('');
+  strip.querySelectorAll('.kpi').forEach(b => b.onclick = () => showProvenance(b.dataset.src));
+}
+
+/* popover de procedencia para una cifra (requisito: fuente a un clic) */
+function showProvenance(sid) {
+  const s = sources[sid];
+  const card = document.getElementById('infoCard');
+  if (!s) { return; }
+  card.innerHTML = `
+    <span class="tag">${s.id} · fuente del dato</span>
+    <h3>${s.name}</h3>
+    <div class="ic-row">Publicador <b>${s.publisher.split('(')[0].trim()}</b></div>
+    <div class="ic-row">Vigencia <b>${s.validity}</b></div>
+    <div class="ic-row">Probado el <b>${s.test_date}</b></div>
+    <div class="ic-row">Licencia <b>${s.license.length>40?s.license.slice(0,38)+'…':s.license}</b></div>
+    <div class="ic-row">API key <b>${s.api_key_required?'Sí':'No'}</b></div>
+    <a class="prov-link" href="${s.portal}" target="_blank" rel="noopener">Abrir portal oficial</a>`;
+  card.classList.remove('hidden');
+  // centrar sobre el mapa
+  const wrap = document.getElementById('map-wrap').getBoundingClientRect();
+  card.style.left = Math.max(16, wrap.width/2 - 100) + 'px';
+  card.style.top = '70px';
+  card.style.pointerEvents = 'auto';
+  clearTimeout(window._provT);
+  window._provT = setTimeout(() => { card.classList.add('hidden'); card.style.pointerEvents='none'; }, 6000);
 }
 
 /* ---------------- ranking ---------------- */
@@ -229,11 +313,13 @@ function buildRanking() {
   const scored = fc.map(f => ({ f, v: metricValue(f.properties) }))
     .filter(x => x.v != null && !isNaN(x.v))
     .sort((a,b) => b.v - a.v).slice(0, 10);
-  const unit = state.metric === 'density' ? '/mi²' : state.metric === 'growth' ? '%' : '';
+  const isClimate = state.layer === 'climate';
+  const unit = isClimate ? '°F' : state.metric === 'density' ? '/mi²' : state.metric === 'growth' ? '%' : '';
   const maxV = scored.length ? scored[0].v : 1;
   el.innerHTML = scored.map((x, i) => {
     const p = x.f.properties;
-    const val = state.metric === 'growth' ? x.v.toFixed(0)+unit
+    const val = isClimate ? x.v.toFixed(1)+unit
+      : state.metric === 'growth' ? x.v.toFixed(0)+unit
       : state.metric === 'density' ? x.v.toFixed(0)+unit : fmtK(x.v);
     const w = Math.max(4, (x.v / maxV) * 100);
     return `<button class="rank-row" data-name="${p.name}">
@@ -527,16 +613,18 @@ async function init() {
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, opacity: .9 }).addTo(map);
 
-  const [c, m, cg, st, dict, q] = await Promise.all([
+  const [c, m, cg, cl, st, dict, q, src] = await Promise.all([
     fetch('data/counties.geojson').then(r=>r.json()),
     fetch('data/municipalities.geojson').then(r=>r.json()),
     fetch('data/congress.geojson').then(r=>r.json()),
+    fetch('data/climate.geojson').then(r=>r.json()).catch(()=>({type:'FeatureCollection',features:[]})),
     fetch('data/stats.json').then(r=>r.json()),
     fetch('data/dictionary.json').then(r=>r.json()).catch(()=>({})),
     fetch('data/quality.json').then(r=>r.json()).catch(()=>({})),
+    fetch('data/sources.json').then(r=>r.json()).catch(()=>({sources:{}})),
   ]);
-  data = { counties: c, municipalities: m, congress: cg };
-  stats = st; dictionary = dict; quality = q;
+  data = { counties: c, municipalities: m, congress: cg, climate: cl };
+  stats = st; dictionary = dict; quality = q; sources = src.sources || {};
 
   bindTabs();
   bindControls();
