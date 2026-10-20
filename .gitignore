@@ -1,0 +1,14 @@
+# datos crudos descargados de la API (regenerables con scripts/process_data.py)
+/data/*_raw.json
+data/*_raw.json
+
+# dependencias y entornos locales del sandbox
+.pylibs/
+.home/
+.run/
+.tmp/
+.cache/
+
+# python
+__pycache__/
+*.pyc

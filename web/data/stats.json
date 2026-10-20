@@ -1,0 +1,72 @@
+{
+  "generated_from": "Arkansas GIS Office - geodata.gis.arkansas.gov",
+  "counties": {
+    "count": 75,
+    "total_pop2020": 3011524,
+    "total_sq_miles": 53439.0
+  },
+  "municipalities": {
+    "count": 200,
+    "by_class": {
+      "Second Class": 73,
+      "Incorporated": 78,
+      "First Class": 49
+    },
+    "total_pop2020": 786545
+  },
+  "congress_districts": 4,
+  "state_pop_series": [
+    {
+      "year": 1900,
+      "pop": 1311564
+    },
+    {
+      "year": 1910,
+      "pop": 1574449
+    },
+    {
+      "year": 1920,
+      "pop": 1752204
+    },
+    {
+      "year": 1930,
+      "pop": 1854482
+    },
+    {
+      "year": 1940,
+      "pop": 1949387
+    },
+    {
+      "year": 1950,
+      "pop": 1909511
+    },
+    {
+      "year": 1960,
+      "pop": 1786272
+    },
+    {
+      "year": 1970,
+      "pop": 1923295
+    },
+    {
+      "year": 1980,
+      "pop": 2286435
+    },
+    {
+      "year": 1990,
+      "pop": 2350725
+    },
+    {
+      "year": 2000,
+      "pop": 2673400
+    },
+    {
+      "year": 2010,
+      "pop": 2915918
+    },
+    {
+      "year": 2020,
+      "pop": 3011524
+    }
+  ]
+}
