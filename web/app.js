@@ -8,15 +8,19 @@ const DECADES = [1900,1910,1920,1930,1940,1950,1960,1970,1980,1990,2000,2010,202
 // Escala de color secuencial (oscuro -> claro-calido)
 const RAMP = ['#0d2b3e','#11465c','#1f7a7a','#36a89a','#5fd0a8','#9ee6a0','#f2e394','#f6a94a','#e8622a'];
 
+const LAYER_LABELS = { counties: 'Condados', municipalities: 'Municipios', congress: 'Distritos Congresionales' };
+
 const state = {
   layer: 'counties',
   metric: 'pop',
   year: 2020,
   playing: false,
   playTimer: null,
+  bubbles: false,
 };
 
-let map, geoLayer, data = {}, stats = {};
+let map, geoLayer, bubbleLayer, data = {}, stats = {}, dictionary = {}, quality = {};
+let currentScale = null;
 
 /* ---------------- utilidades ---------------- */
 const fmt = n => (n == null || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-US');
@@ -31,7 +35,6 @@ function metricValue(props) {
     return (pop != null && sm) ? pop / sm : null;
   }
   if (state.metric === 'growth') {
-    // crecimiento vs 1900 (condados) o 2000 (municipios)
     const base = state.layer === 'counties' ? props.pop1900 : props.pop2000;
     const cur = state.layer === 'counties' ? props['pop'+state.year] : props.pop2020;
     if (!base || cur == null) return null;
@@ -40,14 +43,15 @@ function metricValue(props) {
   return pop;
 }
 
+function metricLabel() {
+  return state.metric === 'pop' ? 'Población' : state.metric === 'density' ? 'Densidad' : 'Crecimiento';
+}
+
 function colorScale(features) {
   const vals = features.map(f => metricValue(f.properties)).filter(v => v != null && !isNaN(v)).sort((a,b)=>a-b);
   if (!vals.length) return { fn: () => RAMP[0], breaks: [] };
-  // cuantiles
   const breaks = [];
-  for (let i = 1; i < RAMP.length; i++) {
-    breaks.push(vals[Math.floor((i / RAMP.length) * vals.length)]);
-  }
+  for (let i = 1; i < RAMP.length; i++) breaks.push(vals[Math.floor((i / RAMP.length) * vals.length)]);
   const fn = v => {
     if (v == null || isNaN(v)) return '#2a3150';
     for (let i = 0; i < breaks.length; i++) if (v <= breaks[i]) return RAMP[i];
@@ -56,9 +60,7 @@ function colorScale(features) {
   return { fn, breaks };
 }
 
-let currentScale = null;
-
-/* ---------------- estilos de capa ---------------- */
+/* ---------------- estilos ---------------- */
 function styleFor(feature) {
   if (state.layer === 'congress') {
     const palette = ['#b388ff','#8c9eff','#80d8ff','#a0f0c0'];
@@ -66,12 +68,7 @@ function styleFor(feature) {
     return { color: '#0b1020', weight: 1.4, fillColor: palette[(d-1)%palette.length], fillOpacity: .6 };
   }
   const v = metricValue(feature.properties);
-  return {
-    color: '#0b1020',
-    weight: .8,
-    fillColor: currentScale.fn(v),
-    fillOpacity: .85,
-  };
+  return { color: '#0b1020', weight: .8, fillColor: currentScale.fn(v), fillOpacity: state.bubbles ? .35 : .85 };
 }
 
 /* ---------------- interacciones ---------------- */
@@ -96,7 +93,6 @@ function showInfo(p, ev) {
   const card = document.getElementById('infoCard');
   let html = '';
   if (state.layer === 'counties') {
-    const v = metricValue(p);
     html = `<h3>${p.name} County</h3>
       <div class="ic-row">Pob. ${state.year} <b>${fmt(p['pop'+state.year])}</b></div>
       <div class="ic-row">Superficie <b>${fmt(p.sq_miles)} mi²</b></div>
@@ -129,18 +125,40 @@ function positionInfo(ev) {
   card.style.top = y + 'px';
 }
 
-/* ---------------- render ---------------- */
+/* ---------------- burbujas proporcionales ---------------- */
+function renderBubbles() {
+  if (bubbleLayer) { map.removeLayer(bubbleLayer); bubbleLayer = null; }
+  if (!state.bubbles || state.layer === 'congress') return;
+  const fc = data[state.layer].features;
+  const vals = fc.map(f => f.properties['pop'+state.year] || f.properties.pop2020 || 0);
+  const maxV = Math.max(...vals, 1);
+  bubbleLayer = L.layerGroup();
+  fc.forEach(f => {
+    const p = f.properties;
+    const lat = p._lat, lon = p._lon;
+    if (lat == null || lon == null) return;
+    const v = (state.layer === 'counties' ? p['pop'+state.year] : p.pop2020) || 0;
+    const r = 3 + Math.sqrt(v / maxV) * 26;
+    L.circleMarker([lat, lon], {
+      radius: r, color: '#fff', weight: .8, fillColor: '#f6a94a', fillOpacity: .55,
+    }).bindTooltip(`${p.name}: ${fmt(v)}`, { direction: 'top' }).addTo(bubbleLayer);
+  });
+  bubbleLayer.addTo(map);
+}
+
+/* ---------------- render principal ---------------- */
 function render() {
   if (geoLayer) map.removeLayer(geoLayer);
   const fc = data[state.layer];
   if (!fc) return;
-
   if (state.layer !== 'congress') currentScale = colorScale(fc.features);
-
   geoLayer = L.geoJSON(fc, { style: styleFor, onEachFeature }).addTo(map);
+  renderBubbles();
   buildLegend();
   updateKPIs();
   togglePanels();
+  buildRanking();
+  updateExportNote();
 }
 
 function togglePanels() {
@@ -148,10 +166,11 @@ function togglePanels() {
   const isCongress = state.layer === 'congress';
   document.getElementById('choroplethPanel').style.display = isCongress ? 'none' : 'block';
   document.getElementById('timePanel').style.display = isCounty ? 'block' : 'none';
-  // crecimiento no aplica a congress
+  document.getElementById('rankPanel').style.display = isCongress ? 'none' : 'block';
   document.querySelector('[data-metric="growth"]').style.display = isCounty ? 'block' : 'none';
   document.getElementById('metricHint').textContent =
     state.metric === 'pop' ? 'población' : state.metric === 'density' ? 'densidad' : 'crecimiento';
+  document.getElementById('rankMetricLabel').textContent = metricLabel();
 }
 
 function buildLegend() {
@@ -202,11 +221,87 @@ function updateKPIs() {
   ).join('');
 }
 
+/* ---------------- ranking ---------------- */
+function buildRanking() {
+  const el = document.getElementById('rankList');
+  if (!el || state.layer === 'congress') { if (el) el.innerHTML=''; return; }
+  const fc = data[state.layer].features.slice();
+  const scored = fc.map(f => ({ f, v: metricValue(f.properties) }))
+    .filter(x => x.v != null && !isNaN(x.v))
+    .sort((a,b) => b.v - a.v).slice(0, 10);
+  const unit = state.metric === 'density' ? '/mi²' : state.metric === 'growth' ? '%' : '';
+  const maxV = scored.length ? scored[0].v : 1;
+  el.innerHTML = scored.map((x, i) => {
+    const p = x.f.properties;
+    const val = state.metric === 'growth' ? x.v.toFixed(0)+unit
+      : state.metric === 'density' ? x.v.toFixed(0)+unit : fmtK(x.v);
+    const w = Math.max(4, (x.v / maxV) * 100);
+    return `<button class="rank-row" data-name="${p.name}">
+      <span class="rk-i">${i+1}</span>
+      <span class="rk-name">${p.name}</span>
+      <span class="rk-bar"><span style="width:${w}%"></span></span>
+      <span class="rk-val">${val}</span>
+    </button>`;
+  }).join('');
+  el.querySelectorAll('.rank-row').forEach(btn => {
+    btn.onclick = () => focusByName(btn.dataset.name);
+  });
+}
+
+/* ---------------- búsqueda ---------------- */
+function bindSearch() {
+  const box = document.getElementById('searchBox');
+  const results = document.getElementById('searchResults');
+  box.oninput = () => {
+    const q = box.value.trim().toLowerCase();
+    if (q.length < 2) { results.innerHTML = ''; results.classList.remove('open'); return; }
+    const pool = [];
+    ['counties','municipalities'].forEach(layer => {
+      data[layer].features.forEach(f => {
+        if (f.properties.name && f.properties.name.toLowerCase().includes(q))
+          pool.push({ layer, name: f.properties.name });
+      });
+    });
+    const items = pool.slice(0, 8);
+    results.innerHTML = items.map(it =>
+      `<button class="sr-item" data-layer="${it.layer}" data-name="${it.name}">
+        <span class="sr-dot ${it.layer==='counties'?'c-county':'c-muni'}"></span>
+        ${it.name}<small>${it.layer==='counties'?'Condado':'Municipio'}</small>
+      </button>`).join('') || '<div class="sr-empty">Sin resultados</div>';
+    results.classList.add('open');
+    results.querySelectorAll('.sr-item').forEach(btn => {
+      btn.onclick = () => {
+        if (btn.dataset.layer !== state.layer) switchLayer(btn.dataset.layer);
+        focusByName(btn.dataset.name);
+        results.classList.remove('open');
+        box.value = btn.dataset.name;
+      };
+    });
+  };
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) results.classList.remove('open');
+  });
+}
+
+function focusByName(name) {
+  let target = null;
+  geoLayer.eachLayer(l => {
+    if (l.feature && l.feature.properties.name === name) target = l;
+  });
+  if (!target) return;
+  map.fitBounds(target.getBounds(), { maxZoom: 9, padding: [60,60] });
+  const orig = target.options;
+  target.setStyle({ weight: 3.5, color: '#fff' });
+  setTimeout(() => geoLayer.resetStyle(target), 1800);
+  if (state.layer === 'counties') drawCountyTrend(target.feature.properties);
+}
+
 /* ---------------- gráficos SVG ---------------- */
 function lineChart(points, labels, title, sub) {
   const svg = document.getElementById('trendChart');
   document.getElementById('cpTitle').textContent = title;
   document.getElementById('cpSub').textContent = sub || '';
+  document.getElementById('chartPanel').style.display = 'block';
   const W = 320, H = 150, pad = { l: 34, r: 10, t: 12, b: 20 };
   const max = Math.max(...points), min = Math.min(...points, 0);
   const x = i => pad.l + (i/(points.length-1)) * (W - pad.l - pad.r);
@@ -242,20 +337,136 @@ function drawCountyTrend(p) {
     `Pico histórico: ${fmt(Math.max(...pts))} hab. · Clic en otro condado para comparar.`);
 }
 
-/* ---------------- controles ---------------- */
-function bindControls() {
-  document.querySelectorAll('.layer-btn').forEach(btn => {
-    btn.onclick = () => {
-      document.querySelectorAll('.layer-btn').forEach(b=>b.classList.remove('active'));
-      btn.classList.add('active');
-      state.layer = btn.dataset.layer;
-      if (state.layer !== 'counties' && (state.metric === 'growth')) {
-        state.metric = 'pop';
-        document.querySelectorAll('.metric-btn').forEach(b=>b.classList.toggle('active', b.dataset.metric==='pop'));
-      }
-      render();
+/* ---------------- pestañas ---------------- */
+function bindTabs() {
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const name = tab.dataset.tab;
+      document.querySelectorAll('.tab-body').forEach(b =>
+        b.classList.toggle('hidden', b.dataset.body !== name));
+      if (name === 'dictionary') renderDictionary();
+      if (name === 'quality') renderQuality();
     };
   });
+}
+
+/* ---------------- diccionario de datos ---------------- */
+function renderDictionary() {
+  const el = document.getElementById('dictContent');
+  const d = dictionary[state.layer];
+  if (!d) { el.innerHTML = '<p class="muted-p">Sin metadatos.</p>'; return; }
+  el.innerHTML = `<div class="dict-layer">Capa activa: <b>${d.label}</b></div>` +
+    d.fields.map(f => `
+      <div class="dict-field">
+        <div class="df-head"><code>${f.field}</code><span class="df-type">${f.type}</span></div>
+        <div class="df-desc">${f.desc}${f.unit ? ` <em>(${f.unit})</em>` : ''}</div>
+      </div>`).join('');
+}
+
+/* ---------------- calidad de datos ---------------- */
+function renderQuality() {
+  const head = document.getElementById('qualityHead');
+  const el = document.getElementById('qualityContent');
+  const q = quality[state.layer];
+  if (!q) { el.innerHTML = '<p class="muted-p">Sin reporte.</p>'; return; }
+  // completitud promedio
+  const fields = Object.entries(q.fields);
+  const avg = fields.reduce((s,[,v]) => s + v.completeness, 0) / (fields.length || 1);
+  head.innerHTML = `
+    <div class="q-score">
+      <div class="q-ring" style="--p:${avg}">${avg.toFixed(0)}%</div>
+      <div><strong>${q.records}</strong> registros · ${fields.length} campos<br>
+      <small>Completitud media · clave: <code>${q.key_field}</code> (${q.unique_keys} únicas)</small></div>
+    </div>
+    <div class="q-issues">${q.issues.map(i =>
+      `<span class="q-issue ${/Sin anomalias/i.test(i)?'ok':'warn'}">${/Sin anomalias/i.test(i)?'✓':'⚠'} ${i}</span>`).join('')}</div>`;
+  el.innerHTML = fields.map(([name, v]) => `
+    <div class="q-field">
+      <div class="qf-top"><code>${name}</code><span>${v.completeness}%</span></div>
+      <div class="qf-bar"><span style="width:${v.completeness}%; background:${v.completeness>=99?'#5fd0a8':v.completeness>=90?'#f2e394':'#e8622a'}"></span></div>
+      <div class="qf-meta">${v.nulls>0?`<span class="warn">${v.nulls} nulos</span> · `:''}${
+        v.min!=null ? `min ${fmtK(v.min)} · máx ${fmtK(v.max)} · media ${fmtK(v.mean)}` : 'categórico'}</div>
+    </div>`).join('');
+}
+
+/* ---------------- exportación ---------------- */
+function currentFeatureCollection() {
+  return { type: 'FeatureCollection',
+    properties: {
+      source: 'Arkansas GIS Office (geodata.gis.arkansas.gov)',
+      layer: LAYER_LABELS[state.layer], crs: 'EPSG:4326', exported: new Date().toISOString(),
+    },
+    features: data[state.layer].features };
+}
+
+function download(filename, text, type) {
+  const blob = new Blob([text], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function exportGeoJSON() {
+  download(`arkansas_${state.layer}.geojson`,
+    JSON.stringify(currentFeatureCollection()), 'application/geo+json');
+}
+
+function exportCSV() {
+  const feats = data[state.layer].features;
+  const cols = Object.keys(feats[0].properties).filter(k => !k.startsWith('_'));
+  const rows = [cols.join(',')];
+  feats.forEach(f => {
+    rows.push(cols.map(c => {
+      const v = f.properties[c];
+      const s = v == null ? '' : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+    }).join(','));
+  });
+  download(`arkansas_${state.layer}.csv`, rows.join('\n'), 'text/csv');
+}
+
+function exportCitation() {
+  const year = new Date().getFullYear();
+  const cite = `Arkansas GIS Office. "${LAYER_LABELS[state.layer]}". `
+    + `Arkansas Geospatial Data Portal, geodata.gis.arkansas.gov. `
+    + `Servicio ArcGIS REST (FEATURESERVICES/Boundaries/FeatureServer). `
+    + `CRS EPSG:4326. Consultado ${new Date().toLocaleDateString('es')}. Dominio público (${year}).`;
+  navigator.clipboard?.writeText(cite).then(
+    () => flashNote('🔖 Cita copiada al portapapeles'),
+    () => download('cita.txt', cite, 'text/plain'));
+}
+
+function flashNote(msg) {
+  const n = document.getElementById('exportNote');
+  n.textContent = msg; n.classList.add('flash');
+  setTimeout(() => n.classList.remove('flash'), 2200);
+}
+
+function updateExportNote() {
+  const n = document.getElementById('exportNote');
+  const count = data[state.layer] ? data[state.layer].features.length : 0;
+  n.textContent = `Exporta ${count} entidades de «${LAYER_LABELS[state.layer]}».`;
+}
+
+/* ---------------- controles ---------------- */
+function switchLayer(layer) {
+  state.layer = layer;
+  document.querySelectorAll('.layer-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.layer === layer));
+  if (layer !== 'counties' && state.metric === 'growth') {
+    state.metric = 'pop';
+    document.querySelectorAll('.metric-btn').forEach(b => b.classList.toggle('active', b.dataset.metric==='pop'));
+  }
+  render();
+  if (layer === 'counties') drawStateTrend();
+}
+
+function bindControls() {
+  document.querySelectorAll('.layer-btn').forEach(btn =>
+    btn.onclick = () => switchLayer(btn.dataset.layer));
 
   document.querySelectorAll('.metric-btn').forEach(btn => {
     btn.onclick = () => {
@@ -270,15 +481,25 @@ function bindControls() {
   slider.oninput = () => {
     state.year = +slider.value;
     document.getElementById('yearLabel').textContent = state.year;
-    if (geoLayer) geoLayer.setStyle(styleFor);
     if (state.layer !== 'congress') currentScale = colorScale(data[state.layer].features);
     if (geoLayer) geoLayer.setStyle(styleFor);
+    renderBubbles();
     buildLegend();
     updateKPIs();
+    buildRanking();
+  };
+
+  document.getElementById('bubbleToggle').onchange = e => {
+    state.bubbles = e.target.checked;
+    render();
   };
 
   document.getElementById('playBtn').onclick = togglePlay;
   document.getElementById('cpClose').onclick = () => document.getElementById('chartPanel').style.display='none';
+
+  document.getElementById('exportGeo').onclick = exportGeoJSON;
+  document.getElementById('exportCsv').onclick = exportCSV;
+  document.getElementById('exportCite').onclick = exportCitation;
 }
 
 function togglePlay() {
@@ -301,24 +522,23 @@ async function init() {
   map = L.map('map', { zoomControl: true, attributionControl: false, minZoom: 6, maxZoom: 12 })
     .setView([34.8, -92.3], 7);
 
-  // Basemap sin API key (Esri World Dark Gray Canvas)
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 16,
-  }).addTo(map);
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 16, opacity: .9,
-  }).addTo(map);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, opacity: .9 }).addTo(map);
 
-  const [c, m, cg, st] = await Promise.all([
+  const [c, m, cg, st, dict, q] = await Promise.all([
     fetch('data/counties.geojson').then(r=>r.json()),
     fetch('data/municipalities.geojson').then(r=>r.json()),
     fetch('data/congress.geojson').then(r=>r.json()),
     fetch('data/stats.json').then(r=>r.json()),
+    fetch('data/dictionary.json').then(r=>r.json()).catch(()=>({})),
+    fetch('data/quality.json').then(r=>r.json()).catch(()=>({})),
   ]);
   data = { counties: c, municipalities: m, congress: cg };
-  stats = st;
+  stats = st; dictionary = dict; quality = q;
 
+  bindTabs();
   bindControls();
+  bindSearch();
   render();
   drawStateTrend();
 }

@@ -46,11 +46,23 @@ Tres conjuntos de datos oficiales, conmutables desde la barra lateral:
 
 ### Interactividad (lo que es un *MUST*)
 - 🎨 **Mapa coroplético** con escala de cuantiles (población / densidad / crecimiento).
+- 🫧 **Burbujas proporcionales** opcionales (centroides dimensionados por población).
+- 🔎 **Buscador** de condados y municipios con zoom y resaltado.
+- 📊 **Ranking Top-10** clicable según la métrica activa.
 - 🕰️ **Línea de tiempo animada**: desliza o reproduce la evolución de 1900 a 2020.
 - 📈 **Gráficos históricos**: serie del estado y, al hacer clic en un condado, su propia curva de 120 años.
 - 🧭 **KPIs en vivo** que se recalculan según la capa y el año.
 - 🪧 **Tarjetas al pasar el cursor** con cifras de cada unidad.
-- 📋 **Ficha de Gobernanza** con fuente, servicio, CRS (EPSG:4326), licencia y linaje.
+
+### Pestañas de gobernanza
+- 📋 **Diccionario de datos** — metadatos (tipo, descripción, unidad) de cada campo.
+- ✅ **Calidad de datos** — completitud por campo, nulos, rangos, claves únicas y anomalías
+  (p. ej. detecta que `pop2000` de los municipios está al 99 %: 2 registros nulos).
+- ⬇️ **Exportar** la capa activa a **GeoJSON** o **CSV**, y 🔖 **citar** la fuente al portapapeles.
+- 🏛️ **Ficha de Gobernanza** fija con fuente, servicio, CRS (EPSG:4326), licencia y linaje.
+
+![Pestaña de calidad de datos](docs/preview-quality.png)
+![Diccionario de datos](docs/preview-dictionary.png)
 
 ## 🏛️ Gobernanza de datos
 
