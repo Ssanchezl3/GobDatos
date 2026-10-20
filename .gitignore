@@ -1,6 +1,6 @@
-# datos crudos descargados de la API (regenerables con scripts/process_data.py)
-/data/*_raw.json
-data/*_raw.json
+# datos crudos descargados de las APIs (regenerables con los scripts ETL).
+# Solo la carpeta data/ de nivel superior; los datos PROCESADOS en web/data/ SÍ se versionan.
+/data/
 
 # dependencias y entornos locales del sandbox
 .pylibs/

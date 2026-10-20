@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Arkansas vs Texas · Comparación 3D de Población</title>
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="compare3d.css" />
+</head>
+<body>
+  <!-- TOP BAR -->
+  <header id="topbar">
+    <div class="tb-brand">
+      <div class="tb-mark">3D</div>
+      <div>
+        <h1>Arkansas <span class="vs">vs</span> Texas</h1>
+        <p>Comparación 3D de población por condado · U.S. Census Bureau</p>
+      </div>
+    </div>
+
+    <div class="tb-controls">
+      <div class="seg">
+        <span class="seg-label">Altura por</span>
+        <button class="seg-btn active" data-metric="pop">Población</button>
+        <button class="seg-btn" data-metric="growth">Crecimiento</button>
+      </div>
+
+      <div class="seg">
+        <span class="seg-label">Año</span>
+        <button class="yr-btn" data-year="2000">2000</button>
+        <button class="yr-btn" data-year="2010">2010</button>
+        <button class="yr-btn active" data-year="2020">2020</button>
+      </div>
+
+      <button id="playBtn" class="play">▶ Animar 2000→2020</button>
+      <button id="syncBtn" class="toggle active" title="Sincronizar cámaras">🔗 Sincronizado</button>
+      <a href="index.html" class="link-2d">← Vista 2D</a>
+    </div>
+  </header>
+
+  <!-- DUAL MAP -->
+  <div id="stage">
+    <section class="map-col">
+      <div class="map-head ar">
+        <h2>Arkansas</h2>
+        <div class="mh-stats" id="statsAR"></div>
+      </div>
+      <div id="mapAR" class="map3d"></div>
+    </section>
+
+    <div class="divider"><span>VS</span></div>
+
+    <section class="map-col">
+      <div class="map-head tx">
+        <h2>Texas</h2>
+        <div class="mh-stats" id="statsTX"></div>
+      </div>
+      <div id="mapTX" class="map3d"></div>
+    </section>
+  </div>
+
+  <!-- FLOATING LEGEND / HOVER -->
+  <div id="legend" class="legend-card"></div>
+  <div id="hoverCard" class="hover-card hidden"></div>
+
+  <!-- INSIGHT STRIP -->
+  <footer id="insights"></footer>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="compare3d.js"></script>
+</body>
+</html>

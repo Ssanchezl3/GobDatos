@@ -23,43 +23,98 @@
         </div>
       </header>
 
-      <section class="panel">
-        <h2>Conjunto de datos</h2>
-        <div class="layer-switch" id="layerSwitch">
-          <button class="layer-btn active" data-layer="counties">
-            <span class="dot c-county"></span> Condados
-            <small>75 unidades · censo 1900–2020</small>
-          </button>
-          <button class="layer-btn" data-layer="municipalities">
-            <span class="dot c-muni"></span> Municipios
-            <small>200 ciudades · clase legal</small>
-          </button>
-          <button class="layer-btn" data-layer="congress">
-            <span class="dot c-cong"></span> Distritos Congresionales
-            <small>4 distritos federales</small>
-          </button>
-        </div>
-      </section>
+      <a href="compare3d.html" class="banner-3d">
+        🏙️ <b>Nuevo:</b> Comparación 3D · Arkansas vs Texas →
+      </a>
 
-      <section class="panel" id="choroplethPanel">
-        <h2>Colorear por <span id="metricHint"></span></h2>
-        <div class="metric-switch" id="metricSwitch">
-          <button class="metric-btn active" data-metric="pop">Población</button>
-          <button class="metric-btn" data-metric="density">Densidad</button>
-          <button class="metric-btn" data-metric="growth">Crecimiento</button>
-        </div>
-        <div id="legend" class="legend"></div>
-      </section>
+      <!-- Tabs -->
+      <nav class="tabs" id="tabs">
+        <button class="tab active" data-tab="explore">🗺️ Explorar</button>
+        <button class="tab" data-tab="dictionary">📋 Diccionario</button>
+        <button class="tab" data-tab="quality">✅ Calidad</button>
+      </nav>
 
-      <section class="panel" id="timePanel">
-        <h2>Línea de tiempo · <span id="yearLabel">2020</span></h2>
-        <input type="range" id="yearSlider" min="1900" max="2020" step="10" value="2020" />
-        <div class="slider-ticks">
-          <span>1900</span><span>1960</span><span>2020</span>
-        </div>
-        <button id="playBtn" class="play-btn">▶ Animar un siglo</button>
-      </section>
+      <!-- ===== TAB: EXPLORAR ===== -->
+      <div class="tab-body" data-body="explore">
+        <section class="panel">
+          <h2>Conjunto de datos</h2>
+          <div class="layer-switch" id="layerSwitch">
+            <button class="layer-btn active" data-layer="counties">
+              <span class="dot c-county"></span> Condados
+              <small>75 unidades · censo 1900–2020</small>
+            </button>
+            <button class="layer-btn" data-layer="municipalities">
+              <span class="dot c-muni"></span> Municipios
+              <small>200 ciudades · clase legal</small>
+            </button>
+            <button class="layer-btn" data-layer="congress">
+              <span class="dot c-cong"></span> Distritos Congresionales
+              <small>4 distritos federales</small>
+            </button>
+          </div>
+        </section>
 
+        <section class="panel">
+          <h2>Buscar unidad</h2>
+          <div class="search-wrap">
+            <input type="text" id="searchBox" placeholder="Condado o ciudad…" autocomplete="off" />
+            <div id="searchResults" class="search-results"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="choroplethPanel">
+          <h2>Colorear por <span id="metricHint"></span></h2>
+          <div class="metric-switch" id="metricSwitch">
+            <button class="metric-btn active" data-metric="pop">Población</button>
+            <button class="metric-btn" data-metric="density">Densidad</button>
+            <button class="metric-btn" data-metric="growth">Crecimiento</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="bubbleToggle" /> Mostrar burbujas proporcionales</label>
+          <div id="legend" class="legend"></div>
+        </section>
+
+        <section class="panel" id="timePanel">
+          <h2>Línea de tiempo · <span id="yearLabel">2020</span></h2>
+          <input type="range" id="yearSlider" min="1900" max="2020" step="10" value="2020" />
+          <div class="slider-ticks"><span>1900</span><span>1960</span><span>2020</span></div>
+          <button id="playBtn" class="play-btn">▶ Animar un siglo</button>
+        </section>
+
+        <section class="panel" id="rankPanel">
+          <h2>Ranking · <span id="rankMetricLabel">Población</span></h2>
+          <div id="rankList" class="rank-list"></div>
+        </section>
+
+        <section class="panel export">
+          <h2>Exportar selección</h2>
+          <div class="export-btns">
+            <button id="exportGeo" class="exp-btn">⬇ GeoJSON</button>
+            <button id="exportCsv" class="exp-btn">⬇ CSV</button>
+            <button id="exportCite" class="exp-btn">🔖 Citar</button>
+          </div>
+          <small class="export-note" id="exportNote"></small>
+        </section>
+      </div>
+
+      <!-- ===== TAB: DICCIONARIO ===== -->
+      <div class="tab-body hidden" data-body="dictionary">
+        <section class="panel">
+          <h2>Diccionario de datos</h2>
+          <p class="muted-p">Metadatos de cada campo del conjunto activo. Cambia de capa en la pestaña Explorar.</p>
+          <div id="dictContent"></div>
+        </section>
+      </div>
+
+      <!-- ===== TAB: CALIDAD ===== -->
+      <div class="tab-body hidden" data-body="quality">
+        <section class="panel">
+          <h2>Calidad de datos</h2>
+          <div id="qualityHead" class="quality-head"></div>
+          <div id="qualityContent"></div>
+        </section>
+      </div>
+
+      <!-- Governance footer card (siempre visible) -->
       <section class="panel governance">
         <h2>Ficha de Gobernanza</h2>
         <ul class="gov-list">
@@ -74,21 +129,15 @@
 
       <footer class="foot">
         Datos: <a href="https://gis.arkansas.gov/" target="_blank" rel="noopener">Arkansas GIS Office</a>.
-        Visualización construida con Leaflet. Las geometrías se simplificaron para rendimiento web.
+        Visualización con Leaflet. Geometrías simplificadas para rendimiento web.
       </footer>
     </aside>
 
     <!-- MAP + OVERLAYS -->
     <main id="map-wrap">
       <div id="map"></div>
-
-      <!-- KPI strip -->
       <div class="kpi-strip" id="kpiStrip"></div>
-
-      <!-- Hover tooltip card -->
       <div id="infoCard" class="info-card hidden"></div>
-
-      <!-- Mini chart panel -->
       <div id="chartPanel" class="chart-panel">
         <div class="cp-head">
           <strong id="cpTitle">Población del estado por década</strong>

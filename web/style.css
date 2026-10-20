@@ -264,3 +264,20 @@ body {
   #sidebar { max-height: 42vh; }
   .chart-panel { width: 240px; }
 }
+
+/* banner hacia la vista 3D */
+.banner-3d {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  color: #06243b;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4ad7d4, #ff8a3d);
+  box-shadow: 0 6px 20px rgba(255,138,61,.25);
+  transition: .18s;
+}
+.banner-3d:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(255,138,61,.4); }
+.banner-3d b { font-weight: 800; }

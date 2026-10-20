@@ -10,6 +10,30 @@ de **gobernanza de datos** (fuente autoritativa, linaje, CRS y licencia document
 ![Vista de condados](docs/preview-counties.png)
 ![Distritos congresionales](docs/preview-congress.png)
 
+## 🏙️ NUEVO · Comparación 3D: Arkansas vs Texas (`web/compare3d.html`)
+
+Dos mapas **3D** sincronizados que extruyen cada condado según su **población** (o
+su **crecimiento 2000→2020**), para comparar visualmente dos estados de escala muy
+distinta. Datos del **U.S. Census Bureau** (geometría TIGERweb + Population Estimates),
+100 % comparables entre estados.
+
+![Comparación 3D por población](docs/preview-3d-population.png)
+![Comparación 3D por crecimiento](docs/preview-3d-growth.png)
+
+- 🧊 **Extrusión 3D** (altura ∝ población o crecimiento) con color secuencial
+- 🔗 **Cámaras sincronizadas** (rotar/zoom/inclinar ambos mapas a la vez) — conmutable
+- 🕰️ **Años 2000 / 2010 / 2020** + botón de **animación**
+- 🪧 **Hover** con cifras por condado y 📊 **tira de insights** automática
+  (p. ej. *Texas es 9.7× más poblado que Arkansas*)
+
+| | Condados | Pob. 2020 | Crecimiento 2000–2020 | Condado mayor |
+|--|--|--|--|--|
+| **Arkansas** | 75 | 3.01 M | +12.7 % | Pulaski (399 k) |
+| **Texas** | 254 | 29.15 M | +39.8 % | Harris (4.73 M) |
+
+> Fuentes keyless: [TIGERweb](https://tigerweb.geo.census.gov/) para geometría y los
+> archivos estáticos de *Population Estimates* de `www2.census.gov` para población.
+
 ## ✨ Qué muestra
 
 Tres conjuntos de datos oficiales, conmutables desde la barra lateral:
@@ -45,39 +69,40 @@ Las geometrías originales (~17 MB) se simplificaron preservando la topología a
 ## 🚀 Uso local
 
 ```bash
-# 1) (Opcional) regenerar los datos desde la API oficial
+# 1) (Opcional) regenerar los datos desde las APIs oficiales
 pip install --target=.pylibs shapely
-#   descarga los GeoJSON crudos en ./data y luego:
-PYTHONPATH=.pylibs python3 scripts/process_data.py
+PYTHONPATH=.pylibs python3 scripts/process_data.py   # Arkansas (vista 2D)
+PYTHONPATH=.pylibs python3 scripts/build_compare.py  # AR vs TX (vista 3D)
+#   ambos scripts descargan los datos crudos a ./data automáticamente
 
 # 2) servir la app
 cd web
 python3 -m http.server 8099
-# abre http://localhost:8099
+# vista 2D:  http://localhost:8099/index.html
+# vista 3D:  http://localhost:8099/compare3d.html
 ```
 
 ## 📁 Estructura
 
 ```
 GobDatos/
-├── scripts/process_data.py   # ETL: descarga simplificada → GeoJSON + stats
-├── data/                     # GeoJSON crudos de la API (no versionados)
+├── scripts/
+│   ├── process_data.py       # ETL vista 2D: Arkansas GIS → GeoJSON + stats
+│   └── build_compare.py      # ETL vista 3D: US Census (AR+TX) → GeoJSON + stats
+├── data/                     # datos crudos de las APIs (no versionados)
 └── web/
-    ├── index.html            # UI
-    ├── style.css             # estilos (tema oscuro)
-    ├── app.js                # lógica Leaflet + coroplético + animación + gráficos
-    └── data/                 # datasets procesados servidos al navegador
-        ├── counties.geojson
-        ├── municipalities.geojson
-        ├── congress.geojson
-        └── stats.json
+    ├── index.html / style.css / app.js      # vista 2D (Leaflet)
+    ├── compare3d.html / .css / .js          # vista 3D comparativa (MapLibre)
+    └── data/                                # datasets procesados servidos al navegador
+        ├── counties.geojson · municipalities.geojson · congress.geojson · stats.json
+        └── compare.geojson · compare_stats.json
 ```
 
 ## 🛠️ Tecnología
-- [Leaflet](https://leafletjs.com/) para el mapa
-- Basemap sin API key: Esri *World Dark Gray Canvas*
+- [Leaflet](https://leafletjs.com/) para la vista 2D · [MapLibre GL JS](https://maplibre.org/) para la 3D
+- Basemaps sin API key: Esri *World Dark Gray*
 - SVG puro para los gráficos (sin dependencias de charting)
 - [Shapely](https://shapely.readthedocs.io/) para la simplificación geométrica
 
 ---
-Datos cortesía de la **Arkansas GIS Office** · dominio público.
+Datos: **Arkansas GIS Office** (vista 2D) y **U.S. Census Bureau** (vista 3D) · dominio público.

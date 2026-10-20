@@ -1,0 +1,78 @@
+{
+  "generated_from": "U.S. Census Bureau",
+  "crs": "EPSG:4326 (WGS 84)",
+  "states": {
+    "05": {
+      "records": 75,
+      "fields": {
+        "pop2000": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 5731.0,
+          "max": 361370.0,
+          "mean": 35643.9
+        },
+        "pop2010": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 5368.0,
+          "max": 382748.0,
+          "mean": 38878.9
+        },
+        "pop2020": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 4740.0,
+          "max": 399125.0,
+          "mean": 40153.2
+        },
+        "growth": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": -37.3,
+          "max": 85.5,
+          "mean": -1.8
+        }
+      },
+      "issues": [
+        "44 condado(s) con crecimiento negativo (despoblacion)"
+      ]
+    },
+    "48": {
+      "records": 254,
+      "fields": {
+        "pop2000": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 67.0,
+          "max": 3401139.0,
+          "mean": 82090.7
+        },
+        "pop2010": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 82.0,
+          "max": 4092459.0,
+          "mean": 98998.3
+        },
+        "pop2020": {
+          "completeness": 100.0,
+          "zeros": 0,
+          "min": 63.0,
+          "max": 4731122.0,
+          "mean": 114745.9
+        },
+        "growth": {
+          "completeness": 99.6,
+          "zeros": 1,
+          "min": -35.9,
+          "max": 150.7,
+          "mean": 10.2
+        }
+      },
+      "issues": [
+        "113 condado(s) con crecimiento negativo (despoblacion)"
+      ]
+    }
+  }
+}

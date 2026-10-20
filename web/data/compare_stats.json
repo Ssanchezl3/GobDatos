@@ -1,0 +1,114 @@
+{
+  "generated_from": "U.S. Census Bureau (TIGERweb + Population Estimates)",
+  "crs": "EPSG:4326 (WGS 84)",
+  "states": {
+    "05": {
+      "name": "Arkansas",
+      "counties": 75,
+      "pop": {
+        "2000": 2673293,
+        "2010": 2915918,
+        "2020": 3011490
+      },
+      "growth_2000_2020": 12.7,
+      "top_pop": [
+        {
+          "name": "Pulaski",
+          "pop": 399125
+        },
+        {
+          "name": "Benton",
+          "pop": 284340
+        },
+        {
+          "name": "Washington",
+          "pop": 245866
+        },
+        {
+          "name": "Sebastian",
+          "pop": 127797
+        },
+        {
+          "name": "Faulkner",
+          "pop": 123493
+        }
+      ],
+      "fastest": [
+        {
+          "name": "Benton",
+          "growth": 85.5
+        },
+        {
+          "name": "Washington",
+          "growth": 55.8
+        },
+        {
+          "name": "Saline",
+          "growth": 47.7
+        },
+        {
+          "name": "Faulkner",
+          "growth": 43.5
+        },
+        {
+          "name": "Lonoke",
+          "growth": 40.0
+        }
+      ]
+    },
+    "48": {
+      "name": "Texas",
+      "counties": 254,
+      "pop": {
+        "2000": 20851028,
+        "2010": 25145561,
+        "2020": 29145459
+      },
+      "growth_2000_2020": 39.8,
+      "top_pop": [
+        {
+          "name": "Harris",
+          "pop": 4731122
+        },
+        {
+          "name": "Dallas",
+          "pop": 2611481
+        },
+        {
+          "name": "Tarrant",
+          "pop": 2110623
+        },
+        {
+          "name": "Bexar",
+          "pop": 2009316
+        },
+        {
+          "name": "Travis",
+          "pop": 1290218
+        }
+      ],
+      "fastest": [
+        {
+          "name": "Rockwall",
+          "growth": 150.7
+        },
+        {
+          "name": "Hays",
+          "growth": 146.2
+        },
+        {
+          "name": "Williamson",
+          "growth": 143.1
+        },
+        {
+          "name": "Fort Bend",
+          "growth": 132.2
+        },
+        {
+          "name": "Collin",
+          "growth": 117.1
+        }
+      ]
+    }
+  }
+}

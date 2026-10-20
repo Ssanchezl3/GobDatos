@@ -1,0 +1,184 @@
+{
+  "generated_from": "Arkansas GIS Office - geodata.gis.arkansas.gov",
+  "crs": "EPSG:4326 (WGS 84)",
+  "counties": {
+    "records": 75,
+    "fields": {
+      "fips": {
+        "completeness": 100.0,
+        "nulls": 0
+      },
+      "name": {
+        "completeness": 100.0,
+        "nulls": 0
+      },
+      "pop1900": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 7025.0,
+        "max": 63179.0,
+        "mean": 17487.5
+      },
+      "pop1910": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 8946.0,
+        "max": 86751.0,
+        "mean": 20992.7
+      },
+      "pop1920": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 8779.0,
+        "max": 109464.0,
+        "mean": 23362.7
+      },
+      "pop1930": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 7695.0,
+        "max": 137727.0,
+        "mean": 24726.4
+      },
+      "pop1940": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 8392.0,
+        "max": 156085.0,
+        "mean": 25991.8
+      },
+      "pop1950": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 5978.0,
+        "max": 196685.0,
+        "mean": 25460.1
+      },
+      "pop1960": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 4927.0,
+        "max": 242980.0,
+        "mean": 23817.0
+      },
+      "pop1970": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 5573.0,
+        "max": 287189.0,
+        "mean": 25643.9
+      },
+      "pop1980": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 6079.0,
+        "max": 340613.0,
+        "mean": 30485.8
+      },
+      "pop1990": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 5826.0,
+        "max": 349660.0,
+        "mean": 31343.0
+      },
+      "pop2000": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 5744.0,
+        "max": 361474.0,
+        "mean": 35645.3
+      },
+      "pop2010": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 5368.0,
+        "max": 382748.0,
+        "mean": 38878.9
+      },
+      "pop2020": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 4739.0,
+        "max": 399125.0,
+        "mean": 40153.7
+      },
+      "sq_miles": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 544.21634596,
+        "max": 1054.55752066,
+        "mean": 712.5
+      }
+    },
+    "issues": [
+      "Sin anomalias detectadas"
+    ],
+    "key_field": "fips",
+    "unique_keys": 75
+  },
+  "municipalities": {
+    "records": 200,
+    "fields": {
+      "classification": {
+        "completeness": 100.0,
+        "nulls": 0
+      },
+      "fips": {
+        "completeness": 100.0,
+        "nulls": 0
+      },
+      "name": {
+        "completeness": 100.0,
+        "nulls": 0
+      },
+      "pop2000": {
+        "completeness": 99.0,
+        "nulls": 2,
+        "min": 36.0,
+        "max": 183133.0,
+        "mean": 3454.5
+      },
+      "pop2010": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 30.0,
+        "max": 193524.0,
+        "mean": 3747.5
+      },
+      "pop2020": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 46.0,
+        "max": 202591.0,
+        "mean": 3932.7
+      },
+      "sq_miles": {
+        "completeness": 100.0,
+        "nulls": 0,
+        "min": 0.08406917,
+        "max": 5118.05711148,
+        "mean": 30.6
+      }
+    },
+    "issues": [
+      "Sin anomalias detectadas"
+    ],
+    "key_field": "fips",
+    "unique_keys": 200
+  },
+  "congress": {
+    "records": 4,
+    "fields": {
+      "district": {
+        "completeness": 100.0,
+        "nulls": 0
+      }
+    },
+    "issues": [
+      "Sin anomalias detectadas"
+    ],
+    "key_field": "district",
+    "unique_keys": 4
+  }
+}

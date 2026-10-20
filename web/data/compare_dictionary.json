@@ -1,0 +1,41 @@
+{
+  "label": "Condados (AR vs TX)",
+  "fields": [
+    {
+      "field": "geoid",
+      "type": "codigo",
+      "desc": "GEOID del condado (STATE+COUNTY)",
+      "unit": ""
+    },
+    {
+      "field": "state_name",
+      "type": "texto",
+      "desc": "Estado (Arkansas o Texas)",
+      "unit": ""
+    },
+    {
+      "field": "name",
+      "type": "texto",
+      "desc": "Nombre del condado",
+      "unit": ""
+    },
+    {
+      "field": "pop2000 / pop2010 / pop2020",
+      "type": "numero",
+      "desc": "Poblacion censal decenal",
+      "unit": "habitantes"
+    },
+    {
+      "field": "growth",
+      "type": "numero",
+      "desc": "Crecimiento poblacional 2000\u21922020",
+      "unit": "%"
+    },
+    {
+      "field": "lat / lon",
+      "type": "numero",
+      "desc": "Centroide geometrico",
+      "unit": "grados (EPSG:4326)"
+    }
+  ]
+}
