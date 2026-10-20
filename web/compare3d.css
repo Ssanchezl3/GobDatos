@@ -1,12 +1,12 @@
 :root {
-  --bg: #090d1a;
-  --panel: rgba(17,24,43,.92);
-  --line: #27335b;
-  --text: #eaf0fb;
-  --muted: #8b97b8;
-  --ar: #4ad7d4;
-  --tx: #ff8a3d;
-  --shadow: 0 10px 40px rgba(0,0,0,.5);
+  --bg: #0a0a0a;
+  --panel: rgba(14,14,14,.94);
+  --line: #333333;
+  --text: #f5f5f5;
+  --muted: #9a9a9a;
+  --ar: #ffffff;
+  --tx: #8a8a8a;
+  --shadow: 0 10px 40px rgba(0,0,0,.6);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
@@ -23,15 +23,15 @@ body {
 #topbar {
   display: flex; align-items: center; justify-content: space-between;
   gap: 16px; padding: 12px 20px;
-  background: linear-gradient(180deg, #0d1324, #0a0f1e);
+  background: #0a0a0a;
   border-bottom: 1px solid var(--line);
   z-index: 20; flex-wrap: wrap;
 }
 .tb-brand { display: flex; align-items: center; gap: 12px; }
 .tb-mark {
   width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center;
-  font-weight: 800; color: #06243b;
-  background: linear-gradient(135deg, var(--ar), var(--tx));
+  font-weight: 800; color: #000;
+  background: #fff;
   box-shadow: var(--shadow);
 }
 .tb-brand h1 { font-size: 18px; font-weight: 800; letter-spacing: .3px; }
@@ -51,7 +51,7 @@ body {
   transition: .15s;
 }
 .seg-btn:hover, .yr-btn:hover { color: var(--text); }
-.seg-btn.active, .yr-btn.active { background: var(--ar); color: #06243b; }
+.seg-btn.active, .yr-btn.active { background: #fff; color: #000; }
 .play, .toggle, .link-2d {
   border: 1px solid var(--line); border-radius: 9px;
   padding: 8px 12px; cursor: pointer; font-weight: 600; font-size: 12px;

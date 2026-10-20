@@ -308,18 +308,18 @@ function lineChart(points, labels, title, sub) {
   const y = v => H - pad.b - ((v - min)/(max - min || 1)) * (H - pad.t - pad.b);
   const path = points.map((v,i)=> (i===0?'M':'L') + x(i).toFixed(1) + ' ' + y(v).toFixed(1)).join(' ');
   const area = path + ` L ${x(points.length-1)} ${H-pad.b} L ${x(0)} ${H-pad.b} Z`;
-  const dots = points.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="#4ad7d4"/>`).join('');
+  const dots = points.map((v,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="2.6" fill="#ffffff"/>`).join('');
   const xlabels = labels.map((l,i)=> (i%3===0||i===labels.length-1)
     ? `<text class="axis-label" x="${x(i)}" y="${H-6}" text-anchor="middle">${l}</text>` : '').join('');
   const ylabels = [max, (max+min)/2, min].map(v =>
     `<text class="axis-label" x="4" y="${(y(v)+3).toFixed(1)}">${fmtK(v)}</text>`).join('');
   svg.innerHTML = `
     <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#4ad7d4" stop-opacity=".45"/>
-      <stop offset="100%" stop-color="#4ad7d4" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#ffffff" stop-opacity=".30"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient></defs>
     <path d="${area}" fill="url(#g)"/>
-    <path d="${path}" fill="none" stroke="#4ad7d4" stroke-width="2"/>
+    <path d="${path}" fill="none" stroke="#ffffff" stroke-width="2"/>
     ${dots}${xlabels}${ylabels}`;
 }
 
@@ -381,11 +381,11 @@ function renderQuality() {
       <small>Completitud media · clave: <code>${q.key_field}</code> (${q.unique_keys} únicas)</small></div>
     </div>
     <div class="q-issues">${q.issues.map(i =>
-      `<span class="q-issue ${/Sin anomalias/i.test(i)?'ok':'warn'}">${/Sin anomalias/i.test(i)?'✓':'⚠'} ${i}</span>`).join('')}</div>`;
+      `<span class="q-issue ${/Sin anomalias/i.test(i)?'ok':'warn'}">${/Sin anomalias/i.test(i)?'OK':'!'} · ${i}</span>`).join('')}</div>`;
   el.innerHTML = fields.map(([name, v]) => `
     <div class="q-field">
       <div class="qf-top"><code>${name}</code><span>${v.completeness}%</span></div>
-      <div class="qf-bar"><span style="width:${v.completeness}%; background:${v.completeness>=99?'#5fd0a8':v.completeness>=90?'#f2e394':'#e8622a'}"></span></div>
+      <div class="qf-bar"><span style="width:${v.completeness}%; background:${v.completeness>=99?'#f5f5f5':v.completeness>=90?'#9a9a9a':'#5a5a5a'}"></span></div>
       <div class="qf-meta">${v.nulls>0?`<span class="warn">${v.nulls} nulos</span> · `:''}${
         v.min!=null ? `min ${fmtK(v.min)} · máx ${fmtK(v.max)} · media ${fmtK(v.mean)}` : 'categórico'}</div>
     </div>`).join('');
@@ -435,7 +435,7 @@ function exportCitation() {
     + `Servicio ArcGIS REST (FEATURESERVICES/Boundaries/FeatureServer). `
     + `CRS EPSG:4326. Consultado ${new Date().toLocaleDateString('es')}. Dominio público (${year}).`;
   navigator.clipboard?.writeText(cite).then(
-    () => flashNote('🔖 Cita copiada al portapapeles'),
+    () => flashNote('Cita copiada al portapapeles'),
     () => download('cita.txt', cite, 'text/plain'));
 }
 
@@ -505,9 +505,9 @@ function bindControls() {
 function togglePlay() {
   const btn = document.getElementById('playBtn');
   if (state.playing) {
-    clearInterval(state.playTimer); state.playing = false; btn.textContent = '▶ Animar un siglo'; return;
+    clearInterval(state.playTimer); state.playing = false; btn.textContent = 'Animar un siglo'; return;
   }
-  state.playing = true; btn.textContent = '⏸ Pausar';
+  state.playing = true; btn.textContent = 'Pausar';
   let idx = DECADES.indexOf(state.year);
   state.playTimer = setInterval(() => {
     idx = (idx + 1) % DECADES.length;
@@ -519,8 +519,10 @@ function togglePlay() {
 
 /* ---------------- init ---------------- */
 async function init() {
-  map = L.map('map', { zoomControl: true, attributionControl: false, minZoom: 6, maxZoom: 12 })
+  map = L.map('map', { zoomControl: false, attributionControl: false, minZoom: 6, maxZoom: 12 })
     .setView([34.8, -92.3], 7);
+  // Controles de zoom a la derecha para no chocar con los KPIs (arriba-izquierda)
+  L.control.zoom({ position: 'topright' }).addTo(map);
 
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16 }).addTo(map);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}', { maxZoom: 16, opacity: .9 }).addTo(map);

@@ -7,8 +7,8 @@
 const YEARS = [2000, 2010, 2020];
 const state = { metric: 'pop', year: 2020, playing: false, timer: null, sync: true };
 
-// rampa de color (pocos -> muchos)
-const RAMP = ['#0d2b3e', '#17596b', '#2c9a8f', '#67d49b', '#d7e36a', '#f3a53a', '#e8541f'];
+// rampa de color monocromática (pocos = oscuro -> muchos = claro)
+const RAMP = ['#1c1c1c', '#3a3a3a', '#585858', '#787878', '#9e9e9e', '#c8c8c8', '#ffffff'];
 
 // escalas de extrusión: metros de altura por unidad
 const EXTRUDE = {
@@ -32,7 +32,7 @@ function baseStyle() {
       },
     },
     layers: [
-      { id: 'bg', type: 'background', paint: { 'background-color': '#090d1a' } },
+      { id: 'bg', type: 'background', paint: { 'background-color': '#000000' } },
       { id: 'carto', type: 'raster', source: 'carto', paint: { 'raster-opacity': 0.5 } },
     ],
   };
@@ -98,7 +98,7 @@ function makeMap(container, stateFips, center, zoom) {
     });
     m.addLayer({
       id: 'edges', type: 'line', source: 'counties',
-      paint: { 'line-color': '#0a0f1e', 'line-width': 0.4, 'line-opacity': 0.5 },
+      paint: { 'line-color': '#000000', 'line-width': 0.4, 'line-opacity': 0.6 },
     });
 
     const code = stateFips === '05' ? 'AR' : 'TX';
@@ -200,7 +200,7 @@ function showHover(p, ev, code) {
     <h3>${p.name} County</h3>
     <div class="hc-row">Pob. ${state.year} <b>${fmt(p['pop'+state.year])}</b></div>
     <div class="hc-row">2000 → 2020 <b>${fmt(p.pop2000)} → ${fmt(p.pop2020)}</b></div>
-    <div class="hc-row">Crecimiento <b style="color:${g>=0?'#67d49b':'#ff6b6b'}">${g>=0?'+':''}${g}%</b></div>`;
+    <div class="hc-row">Crecimiento <b style="color:${g>=0?'#ffffff':'#8a8a8a'}">${g>=0?'+':''}${g}%</b></div>`;
   card.classList.remove('hidden');
   card.style.left = (ev.clientX + 16) + 'px';
   card.style.top = (ev.clientY + 16) + 'px';
@@ -230,19 +230,19 @@ function bind() {
     state.sync = !state.sync;
     const btn = document.getElementById('syncBtn');
     btn.classList.toggle('active', state.sync);
-    btn.textContent = state.sync ? '🔗 Sincronizado' : '🔓 Independiente';
+    btn.textContent = state.sync ? 'Sincronizado' : 'Independiente';
   };
 }
 
 function togglePlay() {
   const btn = document.getElementById('playBtn');
   if (state.playing) {
-    clearInterval(state.timer); state.playing = false; btn.textContent = '▶ Animar 2000→2020'; return;
+    clearInterval(state.timer); state.playing = false; btn.textContent = 'Animar 2000–2020'; return;
   }
   if (state.metric === 'growth') {
     document.querySelector('.seg-btn[data-metric="pop"]').click();
   }
-  state.playing = true; btn.textContent = '⏸ Pausar';
+  state.playing = true; btn.textContent = 'Pausar';
   let i = YEARS.indexOf(state.year);
   state.timer = setInterval(() => {
     i = (i + 1) % YEARS.length;
